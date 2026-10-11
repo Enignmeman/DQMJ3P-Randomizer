@@ -1,5 +1,5 @@
 # DQMJ3P Randomizer
-[English](#english) · [Italiano](#italiano)
+[English](#english) · [Italiano](#italiano) · [Français](#français)
 
 
 <a href="https://github.com/Lurpigi/DQMJ3P-Randomizer/releases/latest">
@@ -46,7 +46,7 @@ You need Python 3.10 or later with Tkinter. From the program folder, run:
 python randomizer_app.py
 ```
 
-Choose **IT** or **EN** in the top-right corner to switch the app language.
+Choose **IT** or **EN** or **FR** in the top-right corner to switch the app language.
 
 The app does not include game files and does not open CIA or 3DS files. It needs the already extracted RomFS folders for the base game and update 1.3. The app combines them while it runs, with update files taking precedence. Keep the app folder together when you move it.
 
@@ -147,7 +147,7 @@ Serve Python 3.10 o una versione successiva con Tkinter. Dalla cartella del prog
 python randomizer_app.py
 ```
 
-Scegli **IT** o **EN** in alto a destra per cambiare la lingua dell'app.
+Scegli **IT** o **EN** o **FR** in alto a destra per cambiare la lingua dell'app.
 
 Il programma non include file di gioco né apre file CIA o 3DS. Per funzionare, richiede le cartelle RomFS già estratte del gioco base e dell'aggiornamento 1.3. Le carica in memoria e usa i file dell'aggiornamento quando lo stesso percorso è presente in entrambe. Se sposti il programma, sposta tutta la sua cartella.
 
@@ -214,3 +214,152 @@ Il randomizer assegna i sostituti in base al record di battaglia. Esegui `python
 ### 💬 Comunità
 
 Entra nel [server Discord di DQMJ3P](https://discord.com/invite/W5yRJpDd5e).
+
+## Français
+
+Un petit randomizer pour *Dragon Quest Monsters: Joker 3 Professional*. Choisissez une Seed pour remplacer les monstres rencontrés (en gardant la même taille). Utilisez la même Seed et les mêmes paramuètres pour avoir les mêmes résultats.
+
+Pour la traduction française non-officielle, allez voir [Le topic correspondant sur Dragon Quest Fan](https://dragonquest-fan.com/forum/index.php?subjectID=14911).
+
+Cette application ne contient pas de ROMs comme des fichiers .3ds ou .cia. Veuillez vous procurer les vôtres vous-même.
+
+### Récupérer le dossier RomFS
+
+#### Méthode 1 - Via HackingToolkit3DS
+> Pour cette méthode, vous aurez besoin de fichiers `.cia` ou `.3ds` pour les jeu de base et mise à jour 1.3.
+
+1. Téléchargez [HackingToolkit3DS v9](https://github.com/Asia81/HackingToolkit9DS/releases/tag/9) et allez extraire l'archive quelque part.
+2. Mettez les fichiers .3ds/.cia dans le dossier de HackingToolkit3DS folder
+3. Lancez l'extraction du jeu de base pour le format correspondant (`.cia` ou `.3ds`). Si on vous demande de décompresser `code.bin`, choisissez **No**.
+4. Renommez le dossier `ExtractedRomFS` obtenu en `romfs-base`, déplacez ce dossier si vous le souhaitez.
+5. Répétez les instruction 3 et 4 pour la mise à jour 1.3. En renommant le dossier comme `romfs-update` au lieu de `romfs-base`.
+6. Vérifiez que chacun des deux dossiers contient un dossier `data/`, comme ceci:
+
+   ```text
+   romfs-base/data/
+   romfs-update/data/
+   ```
+
+#### Méthode 2 - Via Azahar
+> Pour cette méthode, vous aurez besoin d'avoir les jeu de base et mise à jour 1.3 installés sur Azahar.
+1. Lancez Azahar
+2. Faites un clic droit sur DQMJOKER3 PRO
+3. Sélectionnez `Extraire RomFS`
+4. Les RomFS des jeu de base et mise à jour 1.3 seront extraits et leur dossiers seront ouverts
+5. Renommez les dossiers `0004000E001ACB00` en `romfs-base` et `0004000E001ACB00` en `romfs-update`, puis déplacez-les si vous le souhaitez.
+
+#### Méthode 3 - Via GodMode9
+> Pour cette méthode, vous aurez besoin d'avoir les jeu de base et mise à jour 1.3 installés sur votre 3DS avec CFW (Luma3DS).
+
+> Note: Les instructions suivantes sont en français avec les commandes de gm9 en français, allez voir [ceci](https://github.com/d0k3/GodMode9#fonts-and-translations) pour installer la traduction française.
+1. Allumez votre 3DS et appuyez sur **START** pour lancer Godmode9
+2. Appuyez sur le bouton **HOME**
+3. Sélectionnez `Gestionnaire d'applications`
+4. Sélectionnez `[A] CARTE SD`
+5. Descendez jusqu'à `00040000001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v0.0.0)` et appuyez sur A
+6. Sélectionnez `Ouvrir le dossier de l'app`
+7. Sélectionnez le fichier qui finit en `.tmd` et appuyez sur **A**
+8. Sélectionnez `Options de fichier TMD...` puis `Monter CXI/NDS sur le lecteur`
+9. Appuyez sur **A**
+10. Mettez le dossier `romfs` en sélection sans aller dedans
+11. Appuyez sur **R** et **A**
+12. Sélectionnez `Copier vers 0:/gm9/out`
+13. Sélectionnez `[0:] CARTE SD` et allez dans `/gm9/out`
+14. Mettez le dossier `romfs` en sélection et appuyez sur **R** + **X** pour renommer ce dossier en `romfs-base`
+15. Refaites les étapes 2 à 14 mais avec `0004000E001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v3.0.0)` et en renommant le dossier `romfs` en `romfs-update`
+16. Appuyez sur **START** pour redémarrer la console ou **START** + **R** pour l'éteindre
+17. Récupérez les dossiers `romfs-base` et `romfs-update` sur votre ordinateur
+
+### 🚀 Lancer l'application
+
+> Vous aurez besoin de Python 3.10+ avec Tkinter (généralement inclus dans l'installation de base de Python).
+
+Depuis le dossier de l'application, lancez:
+
+```powershell
+python randomizer_app.py
+```
+
+Choisissez **IT**, **EN** ou **FR** dans le coin en haut à droite pour changer la langue.
+
+### 🎲 Créer un paquet
+
+1. Sélectionnez les dossiers RomFS des jeu de base et mise à jour 1.3. (Faites attention à ne pas sélectionner leur sous-dossiers `data/`) Si vous ne les avez pas encore extraits, allez voir [Récupérer le dossier RomFS](#récupérer-le-dossier-romfs).
+2. Vous pouvez changer les familles autorisées pour les remplacements. 
+3. Vous pouvez changer les rangs autorisés pour les remplacements.
+    - Ces filtres 
+    - Si les deux filtres sont actifs, les monstres remplécés devront correspondre aux deux filtres.
+4. Vous pouvez changer la graine une graine. Use `0` to get a random one.
+5. Si vous le souhaitez, **Affichez les paramètres avancés**. Survolez **ⓘ** pour plus d'informations.
+6. Cliquez sur **Créer le paquet**. Les dossier et fichier ZIP seront dans le dossier `output/`.
+
+Les mêmes paramètres et graine vont toujours appliquer les mêmes changements aux entrées de combat. Les rencontres de la même espèce peuvent changer si elles utilisent des entrées différentes. Les rencontres qui partagent une entrée ont les mêmes remplacements.
+
+Les paquets contiennent les fichiers modifiés, un manifeste, un fichier de spoilers, un fichier de configuration, et ce README avec les étapes d'installation. L'application vérifie les deux dossiers RomFS avant de créer ce paquet. Aucun fichier venant du jeu n'est inclus dans les paquets créés.
+
+### Installer le randomizer
+
+#### Sur 3DS avec CFW (Luma3DS)
+
+> Si vous n'avez pas Luma3DS sur votre console, suivez [ce guide](https://3ds.hacks.guide/fr_FR/) pour l'installer.
+
+- Activer le *game patching* (requis):
+   1. Éteignez votre 3DS.
+   2. Appuyez sur **SELECT** quand vous l'allumez.
+   3. Activez **Enable game patching**.
+   4. Appuyez sur **START** pour sauvegarder.
+- Installer le randomizer:
+    1. Sur la carte SD de votre 3DS créez (si non-existant) le dossier `/luma/titles/00040000001ACB00/`.
+    2. Copiez le dossier `romfs/` du paquet dans ce dossier.
+        - Écrasez les fichiers déjà existants.
+
+#### Sur PC ou Android avec Azahar 
+
+> Le jeu et la mise à jour 1.3 doivent déjà être installés.
+
+- PC
+
+    1. Dans la liste des jeux d'Azahar, faites un clic droit sur DQMJ3P et sélectionnez **Open Mods Location**.
+    2. Copiez le dossier `romfs/` du paquet dans ce dossier.
+        - Écrasez les fichiers déjà existants.
+
+- Android
+
+    1. Ouvrez le dossier des données de Azahar avec un explorateur de fichiers.
+    2. Créez `load/mods/00040000001ACB00/` si nécessaire.
+    3. Copiez le dossier `romfs/` du paquet dans ce dossier.
+        - Écrasez les fichiers déjà existants.
+
+### Vérifer la présence du ou supprimer le randomizer
+
+- Lancez le jeu pour vérifier la présence du randomizer.
+- Pour retirer/supprimer le randomizer:
+    - Retirez les fichiers listés dans le manifeste du paquet package manifest.
+    - Ou alors, supprimez le dossier RomFS. (voir section d'installation au dessus pour savoir où chercher)
+
+
+### ⌨️ Utiliser la console pour créer des paquets
+
+> Les commandes suivantes sont des exemples d'utilisation.
+
+```powershell
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --include-special-donors --include-nonwild-instances
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --family material
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --rank f --rank ss
+```
+
+Le randomizer applique des changements via les entrées de combat. Lancez `python randomize.py --help` pour voir tous les paramètres. Pour l'installation, allez voir [Installer le randomizer](#installer-le-randomizer).
+
+### 📚 Documentation
+
+- [Formats de fichiers et détails techniques](https://github.com/Lurpigi/DQMJ3P-Randomizer/blob/main/docs/FORMAT.md#français)
+
+### 💬 Communautés
+
+Joignez le [serveur Discord DQMJ3P](https://discord.com/invite/W5yRJpDd5e).  
+Joignez le [serveur Discord DQFan](https://discord.gg/WxF5Rhz).
+
+<p align="center" style="margin-top:3rem">
+  <img src="https://raw.githubusercontent.com/Lurpigi/DQMJ3P-Randomizer/main/img/app.png" alt="DQMJ3P Randomizer app / Interfaccia del DQMJ3P Randomizer" width="700">
+</p>
