@@ -21,6 +21,8 @@ from .global_encounters import ENCOUNT_ROOT, MONP_PATH, scan_global_encounters
 from .global_party import intersect_candidate_party_words, scan_party_monp_candidates
 from .global_randomizer import (
     GlobalOptions,
+    MAX_MONSTER_LEVEL,
+    MIN_MONSTER_LEVEL,
     patch_et_archive,
     patch_monsterparam,
     plan_encounter_randomization,
@@ -81,6 +83,7 @@ def build_global_overlay(
     output_name: str | None = None,
     include_special_donors: bool = False,
     include_nonwild_instances: bool = False,
+    randomize_levels: bool = False,
     donor_family_codes: frozenset[int] | None = None,
     donor_rank_codes: frozenset[int] | None = None,
 ) -> dict[str, Any]:
@@ -118,6 +121,7 @@ def build_global_overlay(
         seed=seed,
         include_special_donors=include_special_donors,
         include_nonwild_instances=include_nonwild_instances,
+        randomize_levels=randomize_levels,
         donor_family_codes=donor_family_codes,
         donor_rank_codes=donor_rank_codes,
     )
@@ -128,6 +132,7 @@ def build_global_overlay(
         monsterparam, selected_ids,
         include_nonwild_instances=include_nonwild_instances,
         instance_mapping=plan["instance_mapping"],
+        level_mapping=plan["level_mapping"],
     )
     changed_instance_ids = set(monster_audit["modified_instance_ids"])
 
@@ -199,6 +204,8 @@ def build_global_overlay(
         "options": {
             "include_special_donors": include_special_donors,
             "include_nonwild_instances": include_nonwild_instances,
+            "randomize_levels": randomize_levels,
+            "level_range": [MIN_MONSTER_LEVEL, MAX_MONSTER_LEVEL] if randomize_levels else None,
             "donor_family_codes": (
                 sorted(options.donor_family_codes)
                 if options.donor_family_codes is not None else None
@@ -231,6 +238,8 @@ def build_global_overlay(
             "active_kind_count": plan["active_kind_count"],
             "selected_monp_instance_count": len(selected_ids),
             "changed_monp_instance_count": len(changed_instance_ids),
+            "randomized_level_instance_count": len(plan["level_mapping"]),
+            "changed_monp_level_instance_count": len(monster_audit["modified_level_instance_ids"]),
             "unknown_size_kinds_unchanged": plan["unknown_size_kind_count"],
             "include_nonwild_instances": include_nonwild_instances,
             "monp_ids_shared_across_smot_rows": len(shared_ids),
@@ -242,6 +251,15 @@ def build_global_overlay(
             "include_special_donors": include_special_donors,
         },
         "instance_mappings": instance_rows,
+        "level_mappings": [
+            {
+                "instance_id": row["instance_id"],
+                "source_level": row["source_level"],
+                "target_level": row["target_level"],
+            }
+            for row in instance_rows
+            if randomize_levels
+        ],
         "smot_definition_mappings": smot_row_details,
         "unchanged_records": unchanged_rows,
         "leader_rules": {
@@ -252,7 +270,7 @@ def build_global_overlay(
         "modified_files": file_audits,
         "validation": {
             "same_size_mapping": True,
-            "only_monp_kind_plus2_and_smot_kind_plus4_changed": True,
+            "only_monp_kind_plus2_optional_level_plus24_and_smot_kind_plus4_changed": True,
             "all_user_source_files_read_only": True,
             "monp_ids_reuse_seeded_mapping": True,
         },
@@ -269,6 +287,12 @@ def build_global_overlay(
         f"{row['donor_name'] or 'kind ' + str(row['donor_kind_id'])} ({row['size_slots']} slot)"
         for row in instance_rows
     )
+    if randomize_levels:
+        spoiler.extend(["", "Livelli per record MONP:"])
+        spoiler.extend(
+            f"- ID {row['instance_id']}: livello {row['source_level']} -> {row['target_level']}"
+            for row in instance_rows
+        )
     spoiler.extend(["", "Sostituzioni leader incontro:"])
     spoiler.extend(
         f"- {row['path']} / {row['member']} riga {row['record_index']}: "
@@ -305,6 +329,8 @@ def build_global_overlay(
             "effective_romfs_sha256": dataset.describe()["content_sha256"],
             "include_special_donors": include_special_donors,
             "include_nonwild_instances": include_nonwild_instances,
+            "randomize_levels": randomize_levels,
+            "level_range": [MIN_MONSTER_LEVEL, MAX_MONSTER_LEVEL] if randomize_levels else None,
             "donor_family_codes": (
                 sorted(options.donor_family_codes)
                 if options.donor_family_codes is not None else None

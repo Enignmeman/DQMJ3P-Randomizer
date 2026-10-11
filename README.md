@@ -5,9 +5,6 @@
 <a href="https://github.com/Lurpigi/DQMJ3P-Randomizer/releases/latest">
   <img src="https://img.shields.io/github/v/release/Lurpigi/DQMJ3P-Randomizer?display_name=tag" alt="Latest release / Ultima release">
 </a>
-<a href="https://github.com/Lurpigi/DQMJ3P-Randomizer/releases/latest/download/dqmj3p_randomizer_portable.zip">
-  <img src="https://img.shields.io/github/downloads/Lurpigi/DQMJ3P-Randomizer/total?label=downloads" alt="Downloads / Download">
-</a>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Lurpigi/DQMJ3P-Randomizer/main/img/img.png" alt="DQMJ3P Randomizer icon / Icona del DQMJ3P Randomizer" width="220">
@@ -23,13 +20,41 @@ For the English fan patch, see [DQMJ3P English Fixed](https://github.com/Akoi89/
 
 ### Get the RomFS folders
 
+Use one of these methods to extract the base game RomFS and update 1.3 RomFS.
+
+#### Method 1: HackingToolkit3DS
+
 You need a `.cia` or `.3ds` file for the base game and another for update 1.3.
 
 1. Download [HackingToolkit3DS v9](https://github.com/Asia81/HackingToolkit9DS/releases/tag/9) and extract its archive.
 2. Put the base game file in the HackingToolkit folder and start the extraction option for its format (`.cia` or `.3ds`). When asked whether to decompress `code.bin`, choose **No**.
 3. Rename or move the resulting `ExtractedRomFS` folder to `romfs-base`.
 4. Repeat steps 2 and 3 for update 1.3. Rename or move its `ExtractedRomFS` folder to `romfs-update`.
-5. Check that both folders contain `data/` at the top level:
+
+#### Method 2: Azahar
+
+The base game and update 1.3 must be installed in Azahar.
+
+1. Open Azahar and right-click **DQMJOKER3 PRO**.
+2. Choose **Extract RomFS**. Azahar extracts the RomFS folders and opens their locations.
+3. Rename the base game folder `00040000001ACB00` to `romfs-base` and the update folder `0004000E001ACB00` to `romfs-update`. Move them wherever you like.
+
+#### Method 3: GodMode9
+
+The base game and update 1.3 must be installed on a 3DS with Luma3DS and GodMode9.
+
+The menu labels below are in English. They may appear translated, depending on your GodMode9 language.
+
+1. Start GodMode9. On most setups, hold **START** while turning on the 3DS.
+2. Press **HOME**, then choose **Title manager** and **[A:] SD**.
+3. Select `00040000001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v0.0.0)` and choose **Open title folder**.
+4. Select the `.tmd` file, choose **TMD file options...** > **Mount CXI/NDS to drive**, then press **A**.
+5. Highlight the `romfs` folder without opening it. Press **R** + **A**, then choose **Copy to 0:/gm9/out**.
+6. Open **[0:] SD** > `/gm9/out`. Highlight `romfs`, press **R** + **X**, and rename it to `romfs-base`.
+7. Repeat steps 2–6 for `0004000E001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v3.0.0)`. Name the folder `romfs-update`.
+8. Press **START** to restart the 3DS, or **START** + **R** to turn it off. Copy both folders from the SD card to your computer.
+
+Whichever method you use, check that both folders contain `data/` at the top level:
 
    ```text
    romfs-base/data/
@@ -46,7 +71,7 @@ You need Python 3.10 or later with Tkinter. From the program folder, run:
 python randomizer_app.py
 ```
 
-Choose **IT** or **EN** or **FR** in the top-right corner to switch the app language.
+Choose **EN**, **IT** or **FR** in the top-right corner to switch the app language.
 
 The app does not include game files and does not open CIA or 3DS files. It needs the already extracted RomFS folders for the base game and update 1.3. The app combines them while it runs, with update files taking precedence. Keep the app folder together when you move it.
 
@@ -57,11 +82,14 @@ The app does not include game files and does not open CIA or 3DS files. It needs
 3. Choose the allowed ranks. If you use both filters, a replacement must match both.
 4. Enter a seed. Use `0` to get a random one.
 5. Open **Advanced options** if needed. Hover over **ⓘ** for details.
-6. Optional: select **Use event and boss species as replacements**.
-7. Optional: select **Also change records outside wild encounters (experimental)**.
-8. Click **Create package**. Find the folder and ZIP in `output/`.
+6. Optional: select **Randomize levels too (1–99)**.
+7. Optional: select **Use event and boss species as replacements**.
+8. Optional: select **Also change records outside wild encounters (experimental)**.
+9. Click **Create package**. Find the folder and ZIP in `output/`.
 
 The same seed and options always assign the same replacement to each battle record. Encounters of the same species can differ if they use different records. Encounters that share a record keep the same replacement.
+
+When level randomization is enabled, the seed also assigns each selected monster record a level from 1 to 99. Records shared by multiple encounters get the same level.
 
 The package contains the modified files, a manifest, a spoiler file, a configuration file, and this README with installation steps. The app checks both selected folders before creating it. Source game files are not included in the app download.
 
@@ -99,7 +127,7 @@ Start the game and revisit an area to refresh its encounters. To remove the rand
 
 ```powershell
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42
-python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --include-special-donors --include-nonwild-instances
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --include-special-donors --include-nonwild-instances --randomize-levels
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --family material
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --rank f --rank ss
 ```
@@ -124,13 +152,41 @@ Un semplice randomizer per *Dragon Quest Monsters: Joker 3 Professional*. Scegli
 
 ### Estrai le cartelle RomFS
 
+Scegli uno dei metodi seguenti per estrarre il RomFS del gioco base e quello dell'aggiornamento 1.3.
+
+#### Metodo 1: HackingToolkit3DS
+
 Ti servono un file `.cia` o `.3ds` del gioco base e uno dell'aggiornamento 1.3.
 
 1. Scarica [HackingToolkit3DS v9](https://github.com/Asia81/HackingToolkit9DS/releases/tag/9) e decomprimi l'archivio.
 2. Copia il file del gioco base nella cartella di HackingToolkit e avvia l'estrazione per il suo formato (`.cia` o `.3ds`). Se ti chiede di decomprimere `code.bin`, scegli **No**.
 3. Rinomina la cartella `ExtractedRomFS` in `romfs-base`.
 4. Estrai l'aggiornamento 1.3 allo stesso modo e rinomina la cartella `ExtractedRomFS` ottenuta in `romfs-update`.
-5. Controlla che `data/` si trovi al livello principale di entrambe le cartelle:
+
+#### Metodo 2: Azahar
+
+Il gioco base e l'aggiornamento 1.3 devono essere installati in Azahar.
+
+1. Apri Azahar e fai clic con il tasto destro su **DQMJOKER3 PRO**.
+2. Scegli **Extract RomFS**. Azahar estrae le cartelle RomFS e apre le rispettive posizioni.
+3. Rinomina la cartella del gioco base `00040000001ACB00` in `romfs-base` e quella dell'aggiornamento `0004000E001ACB00` in `romfs-update`. Puoi spostarle dove preferisci.
+
+#### Metodo 3: GodMode9
+
+Il gioco base e l'aggiornamento 1.3 devono essere installati su un 3DS con Luma3DS e GodMode9.
+
+Le voci dei menu qui sotto sono in inglese; possono apparire tradotte in base alla lingua di GodMode9.
+
+1. Avvia GodMode9. Nella maggior parte delle configurazioni, tieni premuto **START** mentre accendi il 3DS.
+2. Premi **HOME**, poi scegli **Title manager** e **[A:] SD**.
+3. Seleziona `00040000001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v0.0.0)` e scegli **Open title folder**.
+4. Seleziona il file `.tmd`, scegli **TMD file options...** > **Mount CXI/NDS to drive**, poi premi **A**.
+5. Evidenzia la cartella `romfs` senza aprirla. Premi **R** + **A**, poi scegli **Copy to 0:/gm9/out**.
+6. Apri **[0:] SD** > `/gm9/out`. Evidenzia `romfs`, premi **R** + **X**, poi rinominala `romfs-base`.
+7. Ripeti i passaggi 2–6 per `0004000E001ACB00 DQMJOKER3 PRO (CTR-U-BDQJ) (J) (v3.0.0)`. Rinomina la cartella in `romfs-update`.
+8. Premi **START** per riavviare il 3DS o **START** + **R** per spegnerlo. Copia entrambe le cartelle dalla scheda SD al computer.
+
+Qualunque metodo tu scelga, controlla che `data/` si trovi al livello principale di entrambe le cartelle:
 
    ```text
    romfs-base/data/
@@ -147,7 +203,7 @@ Serve Python 3.10 o una versione successiva con Tkinter. Dalla cartella del prog
 python randomizer_app.py
 ```
 
-Scegli **IT** o **EN** o **FR** in alto a destra per cambiare la lingua dell'app.
+Scegli **EN**, **IT** o **FR** in alto a destra per cambiare la lingua dell'app.
 
 Il programma non include file di gioco né apre file CIA o 3DS. Per funzionare, richiede le cartelle RomFS già estratte del gioco base e dell'aggiornamento 1.3. Le carica in memoria e usa i file dell'aggiornamento quando lo stesso percorso è presente in entrambe. Se sposti il programma, sposta tutta la sua cartella.
 
@@ -158,11 +214,14 @@ Il programma non include file di gioco né apre file CIA o 3DS. Per funzionare, 
 3. Scegli i gradi ammessi. Se usi entrambi i filtri, ogni sostituto deve rispettarli entrambi.
 4. Inserisci un seed. Usa `0` per generarne uno casuale.
 5. Apri **Opzioni avanzate** se ti servono. Per i dettagli, passa il puntatore su **ⓘ**.
-6. Facoltativo: seleziona **Usa anche mostri degli eventi e dei boss come sostituti**.
-7. Facoltativo: seleziona **Modifica anche i record fuori dagli incontri selvatici (sperimentale)**.
-8. Premi **Crea pacchetto**. Trovi i file in `output/`.
+6. Facoltativo: seleziona **Randomizza anche il livello (1–99)**.
+7. Facoltativo: seleziona **Usa anche mostri degli eventi e dei boss come sostituti**.
+8. Facoltativo: seleziona **Modifica anche i record fuori dagli incontri selvatici (sperimentale)**.
+9. Premi **Crea pacchetto**. Trovi i file in `output/`.
 
 Con lo stesso seed e le stesse opzioni, ogni record di battaglia riceve sempre lo stesso sostituto. Incontri della stessa specie possono ricevere sostituti diversi se usano record diversi. Se più incontri condividono un record, ricevono lo stesso sostituto.
+
+Se attivi la randomizzazione dei livelli, il seed assegna a ogni record MONP selezionato un livello da 1 a 99. I record condivisi da più incontri ricevono lo stesso livello.
 
 Il pacchetto include i file modificati, un manifest, il riepilogo delle sostituzioni, un file di configurazione e questo README con le istruzioni per l'installazione. Prima di crearlo, l'app controlla entrambe le cartelle selezionate. Il download del programma non include file di gioco.
 
@@ -200,7 +259,7 @@ Avvia il gioco ed entra in una nuova area per caricare gli incontri modificati. 
 
 ```powershell
 python randomize.py --base-romfs "C:\percorso\romfs-base" --update-romfs "C:\percorso\romfs-update" --seed 42
-python randomize.py --base-romfs "C:\percorso\romfs-base" --update-romfs "C:\percorso\romfs-update" --seed 42 --include-special-donors --include-nonwild-instances
+python randomize.py --base-romfs "C:\percorso\romfs-base" --update-romfs "C:\percorso\romfs-update" --seed 42 --include-special-donors --include-nonwild-instances --randomize-levels
 python randomize.py --base-romfs "C:\percorso\romfs-base" --update-romfs "C:\percorso\romfs-update" --seed 42 --family slime --family material
 python randomize.py --base-romfs "C:\percorso\romfs-base" --update-romfs "C:\percorso\romfs-update" --seed 42 --family slime --rank f --rank ss
 ```
@@ -280,7 +339,7 @@ Depuis le dossier de l'application, lancez:
 python randomizer_app.py
 ```
 
-Choisissez **IT**, **EN** ou **FR** dans le coin en haut à droite pour changer la langue.
+Choisissez **EN**, **IT** ou **FR** dans le coin en haut à droite pour changer la langue.
 
 ### 🎲 Créer un paquet
 
@@ -291,9 +350,10 @@ Choisissez **IT**, **EN** ou **FR** dans le coin en haut à droite pour changer 
     - Si les deux filtres sont actifs, les monstres remplécés devront correspondre aux deux filtres.
 4. Vous pouvez changer la graine une graine. Use `0` to get a random one.
 5. Si vous le souhaitez, **Affichez les paramètres avancés**. Survolez **ⓘ** pour plus d'informations.
-6. Cliquez sur **Créer le paquet**. Les dossier et fichier ZIP seront dans le dossier `output/`.
+6. En option, sélectionnez **Randomiser aussi le niveau (1–99)**.
+7. Cliquez sur **Créer le paquet**. Les dossier et fichier ZIP seront dans le dossier `output/`.
 
-Les mêmes paramètres et graine vont toujours appliquer les mêmes changements aux entrées de combat. Les rencontres de la même espèce peuvent changer si elles utilisent des entrées différentes. Les rencontres qui partagent une entrée ont les mêmes remplacements.
+Les mêmes paramètres et la même graine appliquent toujours les mêmes changements aux entrées de combat. Les rencontres de la même espèce peuvent changer si elles utilisent des entrées différentes. Les rencontres qui partagent une entrée ont les mêmes remplacements. Si la randomisation des niveaux est activée, chaque entrée MONP sélectionnée reçoit aussi un niveau de 1 à 99 déterminé par la graine. Les entrées partagées gardent le même niveau.
 
 Les paquets contiennent les fichiers modifiés, un manifeste, un fichier de spoilers, un fichier de configuration, et ce README avec les étapes d'installation. L'application vérifie les deux dossiers RomFS avant de créer ce paquet. Aucun fichier venant du jeu n'est inclus dans les paquets créés.
 
@@ -344,7 +404,7 @@ Les paquets contiennent les fichiers modifiés, un manifeste, un fichier de spoi
 
 ```powershell
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42
-python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --include-special-donors --include-nonwild-instances
+python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --include-special-donors --include-nonwild-instances --randomize-levels
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --family material
 python randomize.py --base-romfs "C:\path\to\base-romfs" --update-romfs "C:\path\to\update-romfs" --seed 42 --family slime --rank f --rank ss
 ```

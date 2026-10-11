@@ -35,7 +35,7 @@ FAMILY_LABELS = {
 
 
 class ToolTip:
-    def __init__(self, widget: ttk.Label, text: str, wraplength: int = 360) -> None:
+    def __init__(self, widget: tk.Widget, text: str, wraplength: int = 360) -> None:
         self.widget = widget
         self.text = text
         self.wraplength = wraplength
@@ -132,6 +132,8 @@ _TEXT = {
         "show_advanced": "Mostra opzioni avanzate",
         "hide_advanced": "Nascondi opzioni avanzate",
         "advanced": "Opzioni avanzate",
+        "randomize_levels": "Randomizza anche il livello (1–99)",
+        "levels_help": "Assegna a ogni record MONP selezionato un livello da 1 a 99 determinato dal seed. I record condivisi ricevono lo stesso livello.",
         "special_option": "Usa anche mostri degli eventi e dei boss come sostituti",
         "special_help": "Aggiunge ai possibili sostituti i mostri degli eventi e dei boss con taglia e modello compatibili. L'opzione successiva estende le modifiche ai record fuori dagli incontri selvatici. Alcuni record sono condivisi con gli incontri selvatici.",
         "nonwild_option": "Modifica anche i record fuori dagli incontri selvatici (sperimentale)",
@@ -179,6 +181,8 @@ _TEXT = {
         "show_advanced": "Show advanced options",
         "hide_advanced": "Hide advanced options",
         "advanced": "Advanced options",
+        "randomize_levels": "Randomize levels too (1–99)",
+        "levels_help": "Assigns each selected MONP record a level from 1 to 99 based on the seed. Shared records get the same level.",
         "special_option": "Use event and boss species as replacements",
         "special_help": "Adds event and boss species with a compatible size and model. The next option also changes records outside wild encounters. Some records are shared with wild encounters.",
         "nonwild_option": "Also change records outside wild encounters (experimental)",
@@ -226,6 +230,8 @@ _TEXT = {
         "show_advanced": "Afficher les paramètres avancés",
         "hide_advanced": "Cacher les paramètres avancés",
         "advanced": "Paramètres avancés",
+        "randomize_levels": "Randomiser aussi le niveau (1–99)",
+        "levels_help": "Attribue à chaque entrée MONP sélectionnée un niveau de 1 à 99 déterminé par la graine. Les entrées partagées gardent le même niveau.",
         "special_option": "Utiliser les espèces de monstres d'évènement et de boss comme remplacements",
         "special_help": "Ajoute les espèces des monstes évènementiels et des boss, en leur donnant une taille et un modèle compatible.",
         "nonwild_option": "Aussi changer les entrées en dehors des rencontres en combat (expérimental)",
@@ -256,11 +262,12 @@ class GlobalRandomizerApp:
         self._window_icon = icon.subsample(scale, scale) if scale > 1 else icon
         self.root.iconphoto(True, self._window_icon)
 
-        self.language_var = tk.StringVar(value="it")
+        self.language_var = tk.StringVar(value="en")
         self.seed_var = tk.StringVar(
             value=str(secrets.randbelow(2**64 - 1) + 1))
         self.special_var = tk.BooleanVar(value=False)
         self.nonwild_var = tk.BooleanVar(value=False)
+        self.levels_var = tk.BooleanVar(value=False)
         self.status_var = tk.StringVar(value="")
         self.advanced_open = False
         self.dataset_available = False
@@ -374,7 +381,7 @@ class GlobalRandomizerApp:
     def _build_language_picker(self, parent: ttk.Frame) -> None:
         picker = ttk.Frame(parent)
         picker.pack(side="right", padx=(8, 0))
-        for language, label in (("it", "IT"), ("en", "EN"), ("fr", "FR")):
+        for language, label in (("en", "EN"), ("it", "IT"), ("fr", "FR")):
             option = ttk.Frame(picker)
             option.pack(side="left", padx=(0, 4))
             flag = tk.Canvas(
@@ -538,12 +545,14 @@ class GlobalRandomizerApp:
 
     def _build_advanced(self) -> None:
         self._advanced_option(
+            "randomize_levels", self.levels_var, "levels_help")
+        self._advanced_option(
             "special_option", self.special_var, "special_help")
         self._advanced_option(
             "nonwild_option", self.nonwild_var, "nonwild_help")
 
     def _advanced_option(
-        self, label_key: str, variable: tk.BooleanVar, help_key: str
+        self, label_key: str, variable: tk.BooleanVar, help_key: str,
     ) -> None:
         row = ttk.Frame(self.advanced)
         row.pack(fill="x", anchor="w", pady=3)
@@ -693,6 +702,7 @@ class GlobalRandomizerApp:
             target=self._build_worker,
             args=(
                 seed, self.special_var.get(), self.nonwild_var.get(),
+                self.levels_var.get(),
                 self.base_romfs_root, self.update_romfs_root,
                 self._donor_family_codes(), self._donor_rank_codes(),
             ),
@@ -701,7 +711,7 @@ class GlobalRandomizerApp:
         worker.start()
 
     def _build_worker(
-        self, seed: int, special: bool, nonwild: bool,
+        self, seed: int, special: bool, nonwild: bool, randomize_levels: bool,
         base_romfs_root: Path | None, update_romfs_root: Path | None,
         donor_family_codes: frozenset[int] | None,
         donor_rank_codes: frozenset[int] | None,
@@ -717,6 +727,7 @@ class GlobalRandomizerApp:
                 seed=seed,
                 include_special_donors=special,
                 include_nonwild_instances=nonwild,
+                randomize_levels=randomize_levels,
                 donor_family_codes=donor_family_codes,
                 donor_rank_codes=donor_rank_codes,
             )

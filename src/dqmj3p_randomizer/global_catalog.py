@@ -13,6 +13,7 @@ KINP_HEADER = b"KINP"
 KINP_STRIDE = 120
 KINP_SIZE_OFFSET = 48
 KINP_NAME_BYTES = 32
+MONP_LEVEL_OFFSET = 24
 KCOP_STRIDE = 88
 KCOP_MODEL_OFFSET = 2
 SIZE_CODE_TO_SLOTS = {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}
@@ -95,7 +96,14 @@ def parse_monp_instances(monsterparam: bytes) -> dict[str, Any]:
             continue
         if instance_id in rows_by_id:
             raise GlobalCatalogError(f"ID MONP duplicato: {instance_id}")
-        rows_by_id[instance_id] = {"instance_id": instance_id, "kind_id": kind_id, "record_index": index, "record_offset": offset}
+        level = struct.unpack_from("<H", monsterparam, offset + MONP_LEVEL_OFFSET)[0]
+        rows_by_id[instance_id] = {
+            "instance_id": instance_id,
+            "kind_id": kind_id,
+            "level": level,
+            "record_index": index,
+            "record_offset": offset,
+        }
         by_kind.setdefault(kind_id, []).append(instance_id)
     return {
         "sha256": hashlib.sha256(monsterparam).hexdigest(),

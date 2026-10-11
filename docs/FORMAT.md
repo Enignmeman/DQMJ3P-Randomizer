@@ -15,7 +15,7 @@ The app does not include game files. Select two already extracted folders: the b
 | `MonsterParam.tp` / MONP | 4-byte header, 72-byte records | 16-bit little-endian value at +2; record ID at +0 |
 | SMOT in ET / XBB archives | 4-byte header, 116-byte records | 16-bit little-endian value at +4; MONP references at +2, +6, and +8 |
 
-The randomizer changes only the species fields above. File lengths, IDs, references, and all other bytes stay the same. This includes ENCT, MGRT, and FADT. The app does not add MONP records or rewrite positions and scripts.
+The randomizer changes only the species fields above and, when enabled, the MONP level field at +24. File lengths, IDs, references, and all other bytes stay the same. This includes ENCT, MGRT, and FADT. The app does not add MONP records or rewrite positions and scripts.
 
 ### 🏅 Monster rank
 
@@ -34,7 +34,11 @@ The randomizer changes only the species fields above. File lengths, IDs, referen
 
 Other codes are unknown. The mapping matches the Small, Normal, Mega, Giga, and Ultra Body traits and the [game's size categories](https://dragon-quest.jp/dqmj3/system/size.php). Codes 0 and 1 both mean size S, but represent different body types.
 
-A replacement must have a known size, a MONP record, and an in-game model. With both advanced options off, replacements come from wild encounters and their battle references.
+A replacement must have a known size, a MONP record, and an in-game model. With all advanced options off, replacements come from wild encounters and their battle references.
+
+### 🎚️ Monster level
+
+`MonsterParam.tp` / MONP stores the starting level as a 16-bit little-endian value at +24. When enabled, the level option assigns each selected MONP record a seeded level from 1 to 99. Encounters that share a MONP ID also share its level.
 
 ### 🧩 How records map
 
@@ -65,7 +69,7 @@ L'app non include file di gioco. Seleziona le cartelle RomFS già estratte del g
 | `MonsterParam.tp` / MONP | Intestazione di 4 byte, record di 72 byte | Valore little-endian a 16 bit all'offset +2; ID del record all'offset +0 |
 | SMOT negli archivi ET / XBB | Intestazione di 4 byte, record di 116 byte | Valore little-endian a 16 bit all'offset +4; riferimenti MONP agli offset +2, +6 e +8 |
 
-Il randomizer modifica solo i campi della specie indicati. Non cambia la lunghezza dei file, gli ID, i riferimenti o gli altri byte. I dati ENCT, MGRT e FADT restano invariati. L'app non aggiunge record MONP e non riscrive posizioni o script.
+Il randomizer modifica solo i campi della specie indicati e, se attivi l'opzione, il livello MONP all'offset +24. Non cambia la lunghezza dei file, gli ID, i riferimenti o gli altri byte. I dati ENCT, MGRT e FADT restano invariati. L'app non aggiunge record MONP e non riscrive posizioni o script.
 
 ### 🏅 Grado dei mostri
 
@@ -84,7 +88,11 @@ Il randomizer modifica solo i campi della specie indicati. Non cambia la lunghez
 
 Gli altri codici non sono riconosciuti. La mappatura corrisponde ai tratti Small, Normal, Mega, Giga e Ultra Body e alle [taglie del gioco](https://dragon-quest.jp/dqmj3/system/size.php). I codici 0 e 1 indicano entrambi la taglia S, ma rappresentano tipi di corpo diversi.
 
-Un sostituto deve avere una taglia nota, un record MONP e un modello presente nel gioco. Se entrambe le opzioni avanzate sono disattivate, i sostituti vengono scelti tra i mostri degli incontri selvatici e i relativi riferimenti di battaglia.
+Un sostituto deve avere una taglia nota, un record MONP e un modello presente nel gioco. Se tutte le opzioni avanzate sono disattivate, i sostituti vengono scelti tra i mostri degli incontri selvatici e i relativi riferimenti di battaglia.
+
+### 🎚️ Livello dei mostri
+
+`MonsterParam.tp` / MONP memorizza il livello iniziale in un valore little-endian a 16 bit all'offset +24. Se attivi l'opzione, ogni record MONP selezionato riceve un livello deterministico da 1 a 99. Gli incontri che condividono un ID MONP condividono anche il livello.
 
 ### 🧩 Collegamento tra i record
 
@@ -115,7 +123,7 @@ L'application ne contient paqs de fichiers du jeu. Sélectionnez des dossiers d�
 | `MonsterParam.tp` / MONP | header de 4 bytes, entrées de 72 bytes | valeur de 16 bits petit-boutisme à +2; entrée de l'ID à +0 |
 | SMOT en ET / archives XBB | header de 4 bytes, entrées de 116 bytes | valeur de 16 bits petit-boutisme à +4; Références MONP à +2, +6 et +8 |
 
-Le randmizer ne change que les champs ci-dessus. Longuers de fichier, IDs, références, et tout autre type de bytes restent les mêmes. Celà inclut ENCT, MGRT, et FADT. L'application n'ajoute pas d'entrées MONP ni ne réécrit des positions ou des scripts.
+Le randomizer ne change que les champs d'espèce ci-dessus et, si l'option est activée, le niveau MONP à +24. La longueur des fichiers, les IDs, les références et tous les autres octets restent inchangés. Cela inclut ENCT, MGRT et FADT. L'application n'ajoute pas d'entrées MONP et ne réécrit ni les positions ni les scripts.
 
 ### 🏅 Rang de monstre
 
@@ -134,7 +142,11 @@ Le randmizer ne change que les champs ci-dessus. Longuers de fichier, IDs, réf�
 
 Les autrs codes sont inconnus. Les liaisons sont conformes aux attributs Petit corps, Corps normal, Mega corps, Giga corps et Ultra corps, et aux [Catégories de taille du jeu](https://dragon-quest.jp/dqmj3/system/size.php). Les codes 0 et 1 représentent tous deux des monstres de 1 case, mais représentnent des types de corps différents.
 
-Un remplacement doit avoir une taille connue, une entrée MONP, et un modèle en jeu. Avec les paramètres avancés désactivés, les remplacements viennent des monstres trouvables dans la nature et leur références de combat.
+Un remplacement doit avoir une taille connue, une entrée MONP et un modèle en jeu. Avec toutes les options avancées désactivées, les remplacements viennent des rencontres sauvages et de leurs références de combat.
+
+### 🎚️ Niveau des monstres
+
+`MonsterParam.tp` / MONP stocke le niveau initial comme valeur little-endian de 16 bits à +24. Si l'option est activée, chaque entrée MONP sélectionnée reçoit un niveau déterminé par la graine, entre 1 et 99. Les rencontres qui partagent un ID MONP partagent aussi son niveau.
 
 ### 🧩 Comment les entrées sont liées
 

@@ -8,7 +8,7 @@ import struct
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .global_catalog import GlobalCatalogError, parse_monp_instances
+from .global_catalog import GlobalCatalogError, MONP_LEVEL_OFFSET, parse_monp_instances
 from .global_encounters import SMOT_STRIDE
 from .inspector import XbbFormatError, parse_xbb_bytes
 
@@ -17,11 +17,17 @@ class GlobalRandomizerError(ValueError):
     """The selected inputs cannot produce a safe encounter plan."""
 
 
+MIN_MONSTER_LEVEL = 1
+MAX_MONSTER_LEVEL = 99
+MONSTER_LEVELS = list(range(MIN_MONSTER_LEVEL, MAX_MONSTER_LEVEL + 1))
+
+
 @dataclass(frozen=True)
 class GlobalOptions:
     seed: int
     include_special_donors: bool = False
     include_nonwild_instances: bool = False
+    randomize_levels: bool = False
     avoid_fixed_points: bool = True
     donor_family_codes: frozenset[int] | None = None
     donor_rank_codes: frozenset[int] | None = None
@@ -29,7 +35,10 @@ class GlobalOptions:
     def __post_init__(self) -> None:
         if isinstance(self.seed, bool) or not isinstance(self.seed, int) or not 0 <= self.seed < 2**64:
             raise GlobalRandomizerError("Il seed deve essere un numero intero senza segno a 64 bit")
-        for name in ("include_special_donors", "include_nonwild_instances", "avoid_fixed_points"):
+        for name in (
+            "include_special_donors", "include_nonwild_instances", "randomize_levels",
+            "avoid_fixed_points",
+        ):
             if not isinstance(getattr(self, name), bool):
                 raise GlobalRandomizerError(f"{name} deve essere booleano")
         if self.donor_family_codes is not None:
@@ -163,6 +172,7 @@ def plan_encounter_randomization(
 
     # MONP +2 is the per-instance species field; IDs are stable links shared by SMOT rows.
     instance_mapping: dict[int, int] = {}
+    level_mapping: dict[int, int] = {}
     instance_rows: list[dict[str, Any]] = []
     unchanged: list[dict[str, Any]] = []
     for instance_id in sorted(selected_ids):
@@ -176,10 +186,21 @@ def plan_encounter_randomization(
             continue
         donor, reason = choose(source_kind, f"instance:{instance_id}")
         instance_mapping[instance_id] = donor
+        source_level = row["level"]
+        target_level = source_level
+        if options.randomize_levels:
+            selected_level = _seeded_choice(
+                options.seed, f"level:{instance_id}", MONSTER_LEVELS)
+            if selected_level is None:
+                raise GlobalRandomizerError(f"Livello non pianificato per l'ID MONP {instance_id}")
+            target_level = selected_level
+            level_mapping[instance_id] = selected_level
         instance_rows.append({
             "instance_id": instance_id,
             "source_kind_id": source_kind,
             "donor_kind_id": donor,
+            "source_level": source_level,
+            "target_level": target_level,
             "size_slots": species.get(source_kind, {}).get("size_slots"),
             "reason": reason,
         })
@@ -240,9 +261,12 @@ def plan_encounter_randomization(
         "seed": options.seed,
         "include_special_donors": options.include_special_donors,
         "include_nonwild_instances": options.include_nonwild_instances,
+        "randomize_levels": options.randomize_levels,
+        "level_range": [MIN_MONSTER_LEVEL, MAX_MONSTER_LEVEL] if options.randomize_levels else None,
         "donor_family_codes": sorted(donor_family_codes) if donor_family_codes is not None else None,
         "donor_rank_codes": sorted(donor_rank_codes) if donor_rank_codes is not None else None,
         "instance_mapping": instance_mapping,
+        "level_mapping": level_mapping,
         "instance_rows": instance_rows,
         "smot_row_mapping": row_mappings,
         "smot_row_details": row_details,
@@ -294,8 +318,9 @@ def patch_monsterparam(
     *,
     include_nonwild_instances: bool = False,
     instance_mapping: Mapping[int, int],
+    level_mapping: Mapping[int, int] | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
-    """Patch MONP kind IDs only; records and all other fields stay byte-identical."""
+    """Patch only MONP species (+2) and optional level (+24) fields."""
     try:
         parsed = parse_monp_instances(data)
     except GlobalCatalogError as exc:
@@ -304,24 +329,48 @@ def patch_monsterparam(
     unknown = selected - set(parsed["instances"])
     if unknown:
         raise GlobalRandomizerError(f"ID MONP selezionati non trovati: {sorted(unknown)[:8]}")
+    level_mapping = level_mapping or {}
+    unknown_level_ids = set(level_mapping) - selected
+    if unknown_level_ids:
+        raise GlobalRandomizerError(
+            f"ID MONP con livello pianificato ma non selezionati: {sorted(unknown_level_ids)[:8]}"
+        )
+    for instance_id, level in level_mapping.items():
+        if isinstance(level, bool) or not isinstance(level, int) or not MIN_MONSTER_LEVEL <= level <= MAX_MONSTER_LEVEL:
+            raise GlobalRandomizerError(
+                f"Livello MONP non valido per l'ID {instance_id}: usa un valore da {MIN_MONSTER_LEVEL} a {MAX_MONSTER_LEVEL}"
+            )
+        if parsed["instances"][instance_id]["kind_id"] == 0:
+            raise GlobalRandomizerError(f"Non è possibile assegnare un livello al record MONP vuoto {instance_id}")
     output = bytearray(data)
     allowed: set[int] = set()
-    patched_ids: list[int] = []
+    patched_kind_ids: list[int] = []
+    patched_level_ids: list[int] = []
+    patched_ids: set[int] = set()
     for instance_id in sorted(selected):
         row = parsed["instances"][instance_id]
         old_kind = row["kind_id"]
         if instance_id not in instance_mapping:
             raise GlobalRandomizerError(f"ID MONP senza sostituzione pianificata: {instance_id}")
         new_kind = instance_mapping[instance_id]
-        if new_kind == old_kind:
-            continue
-        offset = row["record_offset"] + 2  # MONP species field; keep every other record byte.
-        allowed.update((offset, offset + 1))
-        _patch_u16(output, offset, new_kind, allowed)
-        patched_ids.append(instance_id)
+        if new_kind != old_kind:
+            offset = row["record_offset"] + 2  # MONP species field.
+            allowed.update((offset, offset + 1))
+            _patch_u16(output, offset, new_kind, allowed)
+            patched_kind_ids.append(instance_id)
+            patched_ids.add(instance_id)
+        new_level = level_mapping.get(instance_id, row["level"])
+        if new_level != row["level"]:
+            offset = row["record_offset"] + MONP_LEVEL_OFFSET
+            allowed.update((offset, offset + 1))
+            struct.pack_into("<H", output, offset, new_level)
+            patched_level_ids.append(instance_id)
+            patched_ids.add(instance_id)
     result = bytes(output)
     audit = _audit_changes(data, result, allowed, "data/Parameter/MonsterParam.tp")
-    audit["modified_instance_ids"] = patched_ids
+    audit["modified_instance_ids"] = sorted(patched_ids)
+    audit["modified_kind_instance_ids"] = patched_kind_ids
+    audit["modified_level_instance_ids"] = patched_level_ids
     audit["selected_instance_count"] = len(selected)
     return result, audit
 
