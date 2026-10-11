@@ -419,7 +419,3 @@ Le randomizer applique des changements via les entrées de combat. Lancez `pytho
 
 Joignez le [serveur Discord DQMJ3P](https://discord.com/invite/W5yRJpDd5e).  
 Joignez le [serveur Discord DQFan](https://discord.gg/WxF5Rhz).
-
-<p align="center" style="margin-top:3rem">
-  <img src="https://raw.githubusercontent.com/Lurpigi/DQMJ3P-Randomizer/main/img/app.png" alt="DQMJ3P Randomizer app / Interfaccia del DQMJ3P Randomizer" width="700">
-</p>
