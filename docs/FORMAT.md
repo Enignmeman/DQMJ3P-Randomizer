@@ -1,6 +1,6 @@
-# File formats and limits / Formati e limiti
+# File formats and limits / Formati e limiti / Formats et limites
 
-[English](#english) · [Italiano](#italiano)
+[English](#english) · [Italiano](#italiano) · [Français](#français)
 
 ## English
 
@@ -101,3 +101,53 @@ Nel RomFS analizzato, 596 ID MONP compaiono in più righe SMOT. Nei Prati Silenz
 L'opzione per includere mostri degli eventi e dei boss aggiunge ai possibili sostituti le specie con taglia e modello compatibili. L'opzione per gli incontri non selvatici modifica anche i record MONP usati fuori dagli incontri selvatici. Può riguardare eventi, boss, personaggi e tornei.
 
 `MonsterPartyTable.tp` / PTYT contiene valori numerici che corrispondono a ID MONP. Il manifest elenca queste corrispondenze, ma il loro significato non è stato confermato. Gli script delle scene possono mantenere i modelli originali. Le verifiche dei file non garantiscono che animazioni, reclutamento o avanzamento della storia funzionino correttamente nel gioco.
+
+## Français
+
+### 📁 Source RomFS
+
+L'application ne contient paqs de fichiers du jeu. Sélectionnez des dossiers déjà extraits: Les RomFS du jeu de base et de la mise à jour 1.3. Chaque racine doit contenir `data/`. L'application combine les dossiers en mémoire, Utilisant les fichiers de la mise à jour quand les fichiers ont la même arborescence. Elle vérifie les paramètres de tableau requis, archives de rencontres et les noms des fichiers de modèles`.bch`, puis calcule la trace SHA-256. La source est lue sans être changée. L'application ne lit ou n'extrait ni les fichiers `.3ds`, ni les fichiers `.cia`.
+
+### 🔧 Champs qui changent
+
+| Tableau | Structure des entrées | Champ des espèces |
+|---|---|---|
+| `MonsterParam.tp` / MONP | header de 4 bytes, entrées de 72 bytes | valeur de 16 bits petit-boutisme à +2; entrée de l'ID à +0 |
+| SMOT en ET / archives XBB | header de 4 bytes, entrées de 116 bytes | valeur de 16 bits petit-boutisme à +4; Références MONP à +2, +6 et +8 |
+
+Le randmizer ne change que les champs ci-dessus. Longuers de fichier, IDs, références, et tout autre type de bytes restent les mêmes. Celà inclut ENCT, MGRT, et FADT. L'application n'ajoute pas d'entrées MONP ni ne réécrit des positions ou des scripts.
+
+### 🏅 Rang de monstre
+
+`KindParam.tp` / KINP stoque le code de rang à +34. les codes 1–8 relient à F, E, D, C, B, A, S, et SS. Le code de famille suikt à +35.
+
+### 📏 Taille des monstres
+
+`KindParam.tp` / KINP a des entrées de 120 bytes. Le code de 16 bits à +48 lie aux cases en combat:
+
+| Code | Cases |
+|---|---:|
+| 0 ou 1 | 1 |
+| 2 | 2 |
+| 3 | 3 |
+| 4 | 4 |
+
+Les autrs codes sont inconnus. Les liaisons sont conformes aux attributs Petit corps, Corps normal, Mega corps, Giga corps et Ultra corps, et aux [Catégories de taille du jeu](https://dragon-quest.jp/dqmj3/system/size.php). Les codes 0 et 1 représentent tous deux des monstres de 1 case, mais représentnent des types de corps différents.
+
+Un remplacement doit avoir une taille connue, une entrée MONP, et un modèle en jeu. Avec les paramètres avancés désactivés, les remplacements viennent des monstres trouvables dans la nature et leur références de combat.
+
+### 🧩 Comment les entrées sont liées
+
+Le randomizer assigne les remplacements par ID d'entrée MONP, pas par espèce. Chaque utilisation d'un ID reçoit le même remplacement. DDes entrées différentes pour une espèce peuvent avir des remplacements différents. La graine rend les liaisons reproductibles.
+
+Les filtres de rang et de famille limitent les possibilités de monstres remplaçants. Quand les deux sont effectifs, un remplacement doit correspondre aux deux filtres. Mais ils ne limitent pas les monstres qui sont randomizés. Si une entrée MONP est partagée par des rencontres différentes, alors changer cette entrée va affecter toutes les rencontres qui l'utilisent.
+
+Un chef SMOT suit la référence MONP à +2 quand les deux entrées indiquent la même espèce. Si ils ne correspondent pas dans les données source, le chef reçoit un remplacement différent de la même taille. L'application conserve ce décalage originel. Les alliés restent liés à leurs entrées MONP.
+
+Dans la version du RomFS utilisé pour cette analyse, 596 IDs MONP apparaissent dans plusieurs lignes SMOT. Dans les Plaines Silencieuses, les définitions des Chaporcs magiques 4 et 14 partagent les ID 10/11/12. La définition 41 utilise les ID 97/98/99. Les définitions 4 et 14 ont les mêmes remplacements car elles partagent des entrées. Les entités physiques qui utilisent la même entrée de combat restent aussi les mêmes. Les séparer nécessiterait de changer les règles d'apparition, ce que ce randomizer ne change pas.
+
+### ⚠️ Évènements et Boss
+
+Le paramètre qui rajoute les boss et monstres d'évènement ajoute les entrées correspondantes et compatibles aux remplacements possibles. Le paramètre d'inclure les monstres hors combats change aussi les entrées MONP en dehors des rencontres de monstres non-sauvages. Plus que les boss peubvent être affectés.
+
+`MonsterPartyTable.tp` / PTYT contient des valeurs numériques qui correspondent aux ID MONP. Le manifeste indique ces superpositions, mais leur signification n'est pas confirmée. Les scripts de scènes peuvent garder des modèles fixes. Les vérifications de fichiers ne peuvent pas prouver le fonctionnement les animations, dressages ou de la progression dans le jeu.

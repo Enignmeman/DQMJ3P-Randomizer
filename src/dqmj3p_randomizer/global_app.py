@@ -15,8 +15,8 @@ from .romfs_source import RomFsSource, RomFsSourceError
 
 
 FAMILY_ICONS = {
-    1: "💧", 2: "🐉", 3: "🐾", 4: "🌿", 5: "😈",
-    6: "💀", 7: "⚙️",
+    1: "slime", 2: "dragon", 3: "beast", 4: "nature", 5: "demon",
+    6: "undead", 7: "material", 8: "break", 9: "special",
 }
 FAMILY_LABELS = {
     "it": {
@@ -26,6 +26,10 @@ FAMILY_LABELS = {
     "en": {
         1: "Slime", 2: "Dragon", 3: "Beast", 4: "Nature", 5: "Demon",
         6: "Undead", 7: "Material", 8: "Break", 9: "???",
+    },
+    "fr": {
+        1: "Gluant", 2: "Dragon", 3: "Bête", 4: "Naturel", 5: "Démon",
+        6: "Mort-vivant", 7: "Matière", 8: "Ténérium", 9: "???",
     },
 }
 
@@ -192,6 +196,53 @@ _TEXT = {
         "complete_title": "Done",
         "complete_message": "Package created:\n{path}\n\nSeed: {seed}\nExtract the ZIP and copy the romfs folder.",
     },
+    "fr": {
+        "window_title": "DQMJ3P Randomizer",
+        "app_title": "DQMJ3P Randomizer de rencontres",
+        "subtitle": "Remplace les monstres tout en gardant leur taille.",
+        "choose_base_romfs": "Sélectionner le RomFS du jeu de base",
+        "choose_update_romfs": "Sélectionner le RomFS de la mise à jour 1.3",
+        "base_not_selected": "Dossier de base non-sélectionné",
+        "update_not_selected": "Dossier de mise à jour non-sélectionné",
+        "base_romfs_dialog_title": "Sélectionner le RomFS extrait du jeu de base",
+        "update_romfs_dialog_title": "Sélectionnez le RomFS extrait de la mise à jour 1.3",
+        "select_romfs": "Sélectionnez les dossiers des RomFS du jeu de base et de la mise à jour 1.3.",
+        "select_base_romfs": "Sélectionnez le dossier du RomFS du jeu de base.",
+        "select_update_romfs": "Sélectionnez le dossier du RomFS de la mise à jour 1.3.",
+        "families": "Remplacement des familles",
+        "family_description": "Restreint les groupes de remplacements. Si vous choisissez aussi un rang, les deux vont faire effet.",
+        "select_all_families": "Tout sélectionner",
+        "families_not_loaded": "Sélectionnez les dossiers RomFS pour charger les familles.",
+        "family_error_title": "Aucune famille de remplacement sélectionnée",
+        "no_family_selected": "Sélectionnez au moins une famille de remplacement.",
+        "ranks": "Remplacements de rangs",
+        "rank_description": "Ces filtres n'affectent pas quels monstres sont randomizés.",
+        "select_all_ranks": "Tout sélectionner",
+        "ranks_not_loaded": "Sélectionnez les dossiers RomFS pour charger les rangs.",
+        "rank_error_title": "Aucun rang de remplacement sélectionné",
+        "no_rank_selected": "Sélectionnez au moins un rang de remplacement.",
+        "seed": "Graine",
+        "random_seed": "Entrez 0 pour une graine aléatoire",
+        "show_advanced": "Afficher les paramètres avancés",
+        "hide_advanced": "Cacher les paramètres avancés",
+        "advanced": "Paramètres avancés",
+        "special_option": "Utiliser les espèces de monstres d'évènement et de boss comme remplacements",
+        "special_help": "Ajoute les espèces des monstes évènementiels et des boss, en leur donnant une taille et un modèle compatible.",
+        "nonwild_option": "Aussi changer les entrées en dehors des rencontres en combat (expérimental)",
+        "nonwild_help": "Étend les changements aux entrées MONP en dehors des monstres sauvages. Cela pourrait affecter les évènements, les boss, les personnages et les tournois. Certaines scènes pourraient afficher des monstres originaux.",
+        "create": "Créer le paquet",
+        "ready": "Dossiers prêts: {count} archives de rencontres trouvées.",
+        "data_error": "Les dossiers RomFS sont invalides ou incomplets.",
+        "building": "Lecture des tables et céation du paquet…",
+        "build_error": "Impossible de créer le paquet.",
+        "created": "Paquet créé (graine {seed}): {path}",
+        "data_error_title": "RomFS indisponible",
+        "invalid_title": "Graine invalide",
+        "invalid_seed": "Entrer un entier de 0 à 2⁶⁴−1.",
+        "error_title": "Erreur",
+        "complete_title": "Effectué",
+        "complete_message": "Paquet créé:\n{path}\n\nGraine: {seed}\nExtraire le ZIP et copier le dossier romfs.",
+    },
 }
 
 
@@ -323,7 +374,7 @@ class GlobalRandomizerApp:
     def _build_language_picker(self, parent: ttk.Frame) -> None:
         picker = ttk.Frame(parent)
         picker.pack(side="right", padx=(8, 0))
-        for language, label in (("it", "IT"), ("en", "EN")):
+        for language, label in (("it", "IT"), ("en", "EN"), ("fr", "FR")):
             option = ttk.Frame(picker)
             option.pack(side="left", padx=(0, 4))
             flag = tk.Canvas(
@@ -343,9 +394,15 @@ class GlobalRandomizerApp:
     @staticmethod
     def _draw_flag(canvas: tk.Canvas, language: str) -> None:
         if language == "it":
-            canvas.create_rectangle(0, 0, 8, 16, fill="#009246", outline="")
+            canvas.create_rectangle(0, 0, 8, 16, fill="#008c45", outline="")
+            canvas.create_rectangle(8, 0, 16, 16, fill="#f4f9ff", outline="")
+            canvas.create_rectangle(16, 0, 24, 16, fill="#cd212a", outline="")
+            return
+        
+        if language == "fr":
+            canvas.create_rectangle(0, 0, 8, 16, fill="#000091", outline="")
             canvas.create_rectangle(8, 0, 16, 16, fill="#ffffff", outline="")
-            canvas.create_rectangle(16, 0, 24, 16, fill="#ce2b37", outline="")
+            canvas.create_rectangle(16, 0, 24, 16, fill="#e1000f", outline="")
             return
 
         canvas.create_rectangle(0, 0, 24, 16, fill="#012169", outline="#888888")
@@ -365,41 +422,15 @@ class GlobalRandomizerApp:
     def _family_label(self, code: int) -> str:
         return FAMILY_LABELS[self.language_var.get()].get(
             code,
-            f"Family {code}" if self.language_var.get() == "en" else f"Famiglia {code}",
+            f"Family {code}" if self.language_var.get() == "en" else f"Famiglia {code}" if self.language_var.get() == "it" else f"Famille {code}",
         )
 
     def _family_icon_widget(self, parent: ttk.Frame, code: int) -> tk.Widget:
-        if code not in {8, 9}:
-            return ttk.Label(
-                parent, text=FAMILY_ICONS.get(code, "◇"),
-                font=("Segoe UI Emoji", 13), width=3, anchor="center")
-
-        canvas = tk.Canvas(
-            parent, width=30, height=26, highlightthickness=0,
-            borderwidth=0, background=self.root.cget("background"))
-        if code == 8:
-            # Purple crystal for the Break family.
-            canvas.create_polygon(
-                15, 2, 26, 8, 23, 19, 15, 24, 7, 19, 4, 8,
-                fill="#8538c9", outline="#4c1d78", width=1)
-            canvas.create_polygon(15, 2, 11, 8, 15, 21, 7, 19, 4, 8,
-                                 fill="#b86cf0", outline="")
-            canvas.create_polygon(15, 2, 19, 8, 15, 21, 23, 19, 26, 8,
-                                 fill="#62269b", outline="")
-            canvas.create_polygon(11, 8, 19, 8, 15, 21,
-                                 fill="#d5a0ff", outline="")
-        else:
-            # Gold crown for the unknown family.
-            canvas.create_polygon(
-                3, 8, 9, 14, 15, 4, 21, 14, 27, 8, 24, 20, 6, 20,
-                fill="#f2bf38", outline="#9a6800", width=1)
-            canvas.create_rectangle(
-                6, 20, 24, 23, fill="#e6a91c", outline="#9a6800", width=1)
-            for x, y in ((3, 7), (15, 3), (27, 7)):
-                canvas.create_oval(
-                    x - 2, y - 2, x + 2, y + 2,
-                    fill="#ffd85a", outline="#9a6800", width=1)
-        return canvas
+        icon = tk.PhotoImage(file=f"./img/family_icons/{FAMILY_ICONS.get(code)}.png")
+        label = ttk.Label(
+            parent, image=icon, width=3, anchor="center")
+        label.image = icon
+        return label
 
     def _render_family_options(self, family_codes: tuple[int, ...]) -> None:
         previous_codes = set(self.family_vars)
